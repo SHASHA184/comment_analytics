@@ -1,0 +1,36 @@
+services:
+  web:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app:/app
+      - ./schemas:/app/schemas
+    networks:
+      - backend
+    depends_on:
+      - database
+    restart: on-failure
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: database
+    volumes:
+      - ./database:/app
+      - ./schemas:/app/schemas
+    networks:
+      - backend
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./database/.env
+    restart: on-failure
+
+networks:
+  backend:
+    driver: bridge
