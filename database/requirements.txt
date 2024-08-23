@@ -8,3 +8,4 @@ aiohttp==3.8.2
 loguru==0.7.2
 asyncpg==0.26.0
 passlib==1.7.4
+pyjwt==2.9.0
