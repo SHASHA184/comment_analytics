@@ -1,14 +1,16 @@
 from sqlalchemy.orm import Session
-from utils import hash_password, create_access_token, verify_password
+from utils import hash_password, verify_password
 from fastapi import HTTPException, status
 from db_utils.base_model import Base
 import sys
 import pathlib
 from datetime import timedelta
+from sqlalchemy.sql import func
 
 sys.path.append(str(pathlib.Path(__file__).resolve(strict=True).parent.parent))
 
 from schemas.user import UserCreate, UserLogin
+from schemas.post import PostCreate
 from sqlalchemy.sql.expression import select
 from sqlalchemy import (
     Column,
@@ -61,6 +63,12 @@ class User(Base):
         return new_user
     
     @classmethod
+    async def get_user(cls, db: Session, email: str):
+        query = select(cls).where(cls.email == email)
+        result = await db.execute(query)
+        return True if result.scalars().first() else False
+    
+    @classmethod
     async def authenticate_user(cls, db: Session, user: UserLogin):
         query = select(cls).where(cls.email == user.email)
         result = await db.execute(query)
@@ -71,9 +79,41 @@ class User(Base):
         if not verify_password(user.password, db_user.hashed_password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
-        # Створюємо JWT токен
-        access_token_expires = timedelta(minutes=30)
-        access_token = create_access_token(
-            data={"sub": db_user.email}, expires_delta=access_token_expires
-        )
-        return {"access_token": access_token, "token_type": "bearer"}
+        return True if db_user else False
+
+
+class Post(Base):
+    __tablename__ = 'posts'
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    
+    @classmethod
+    async def create_post(cls, db: Session, post: PostCreate):
+        new_post = cls(**post.model_dump())
+        await new_post.save(db)
+        return new_post
+    
+    @classmethod
+    async def get_post(cls, db: Session, post_id: int):
+        query = select(cls).where(cls.id == post_id)
+        result = await db.execute(query)
+        return result.scalars().first()
+    
+    @classmethod
+    async def get_posts(cls, db: Session, skip: int = 0, limit: int = 10):
+        query = select(cls).offset(skip).limit(limit)
+        result = await db.execute(query)
+        return result.scalars().all()
+
+    @classmethod
+    async def delete_post(cls, db: Session, post_id: int):
+        query = select(cls).where(cls.id == post_id)
+        result = await db.execute(query)
+        post = result.scalars().first()
+        if not post:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        await post.delete(db)
+        return post

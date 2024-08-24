@@ -13,6 +13,11 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     logger.info(user)
     return await User.create_user(db, user)
 
-@router.post('/login/')
+@router.get('/users/')
+async def get_user(email: str, db: Session = Depends(get_db)) -> bool:
+    return await User.get_user(db, email)
+
+@router.post("/login")
 async def login(user: UserLogin, db: Session = Depends(get_db)):
-    return await User.authenticate_user(db, user)
+    auth_user = await User.authenticate_user(db, user)
+    return auth_user

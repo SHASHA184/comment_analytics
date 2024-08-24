@@ -2,23 +2,20 @@ from fastapi import APIRouter
 from schemas.user import UserCreate, UserResponse, UserLogin
 from config import DATABASE_API_URL
 import aiohttp
+from utils.async_client import DbLoginRequest, AuthLoginRequest, UserCreateRequest
 
 router = APIRouter()
 
 @router.post('/users/')
 async def create_user(user: UserCreate):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(f"{DATABASE_API_URL}/users/", json=user.model_dump()) as response:
-            response_data = await response.json()
-            if response.status != 200:
-                return response_data
-            return UserResponse(**response_data)
+    db_response = await UserCreateRequest.run(user)
+    return db_response
+    
 
 @router.post("/login")
 async def login(user: UserLogin):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(f"{DATABASE_API_URL}/login/", json=user.model_dump()) as response:
-            response_data = await response.json()
-            if response.status != 200:
-                return response_data
-            return response_data
+    db_response = await DbLoginRequest.run(user)
+    if db_response is False:
+        return db_response
+    auth_response = await AuthLoginRequest.run(user)
+    return auth_response

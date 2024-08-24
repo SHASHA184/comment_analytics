@@ -13,6 +13,7 @@ services:
       - backend
     depends_on:
       - database
+      - auth_service
     restart: on-failure
 
   database:
@@ -29,6 +30,20 @@ services:
       - "8081:8081"
     env_file:
       - ./database/.env
+    restart: on-failure
+
+  auth_service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: auth_service
+    volumes:
+      - ./auth_service:/app
+      - ./schemas:/app/schemas
+    networks:
+      - backend
+    ports:
+      - "8082:8082"
     restart: on-failure
 
 networks:
