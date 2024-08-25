@@ -165,3 +165,43 @@ class PostDeleteRequest:
     async def run(cls, post_id):
         response = await DbApiAsyncClient.run_async(cls, path_extra=post_id)
         return response
+    
+
+class CommentCreateRequest:
+    method = Methods.POST
+    path = "comments/"
+
+    @classmethod
+    async def run(cls, payload):
+        response = await DbApiAsyncClient.run_async(cls, payload)
+        return response
+    
+
+class CommentGetRequest:
+    method = Methods.GET
+    path = "comments/"
+
+    @classmethod
+    async def run(cls, comment_id):
+        response = await DbApiAsyncClient.run_async(cls, path_extra=comment_id)
+        return response
+
+
+class CommentListRequest:
+    method = Methods.GET
+    path = "comments/"
+
+    @classmethod
+    async def run(cls):
+        response = await DbApiAsyncClient.run_async(cls)
+        return response
+
+
+class CommentDeleteRequest:
+    method = Methods.DELETE
+    path = "comments/"
+
+    @classmethod
+    async def run(cls, comment_id):
+        response = await DbApiAsyncClient.run_async(cls, path_extra=comment_id)
+        return response

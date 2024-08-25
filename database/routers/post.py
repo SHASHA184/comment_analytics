@@ -5,7 +5,7 @@ from schemas.post import PostCreate, PostResponse
 from models import Post
 from loguru import logger
 
-router = APIRouter()
+router = APIRouter(tags=["post"], prefix="/posts")
 
 @router.post("/", response_model=PostResponse)
 async def create_post(post: PostCreate, db: AsyncSession = Depends(get_db)):

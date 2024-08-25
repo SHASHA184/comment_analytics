@@ -11,6 +11,7 @@ sys.path.append(str(pathlib.Path(__file__).resolve(strict=True).parent.parent))
 
 from schemas.user import UserCreate, UserLogin
 from schemas.post import PostCreate
+from schemas.comment import CommentCreate
 from sqlalchemy.sql.expression import select
 from sqlalchemy import (
     Column,
@@ -117,3 +118,40 @@ class Post(Base):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
         await post.delete(db)
         return post
+    
+
+class Comment(Base):
+    __tablename__ = 'comments'
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    
+    @classmethod
+    async def create_comment(cls, db: Session, comment: CommentCreate):
+        new_comment = cls(**comment.model_dump())
+        await new_comment.save(db)
+        return new_comment
+    
+    @classmethod
+    async def get_comment(cls, db: Session, comment_id: int):
+        query = select(cls).where(cls.id == comment_id)
+        result = await db.execute(query)
+        return result.scalars().first()
+    
+    @classmethod
+    async def get_comments(cls, db: Session, skip: int = 0, limit: int = 10):
+        query = select(cls).offset(skip).limit(limit)
+        result = await db.execute(query)
+        return result.scalars().all()
+
+    @classmethod
+    async def delete_comment(cls, db: Session, comment_id: int):
+        query = select(cls).where(cls.id == comment_id)
+        result = await db.execute(query)
+        comment = result.scalars().first()
+        if not comment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+        await comment.delete(db)
+        return comment

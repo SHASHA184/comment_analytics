@@ -5,7 +5,7 @@ from models import User
 from db_utils.conn import get_db
 from loguru import logger
 
-router = APIRouter()
+router = APIRouter(tags=["auth"])
 
 
 @router.post('/users/', response_model=UserResponse)

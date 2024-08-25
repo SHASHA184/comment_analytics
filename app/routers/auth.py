@@ -4,13 +4,14 @@ from config import DATABASE_API_URL
 import aiohttp
 from utils.async_client import DbLoginRequest, AuthLoginRequest, UserCreateRequest
 
-router = APIRouter()
+router = APIRouter(tags=["auth"])
 
-@router.post('/users/')
+
+@router.post("/users/")
 async def create_user(user: UserCreate):
     db_response = await UserCreateRequest.run(user)
     return db_response
-    
+
 
 @router.post("/login")
 async def login(user: UserLogin):

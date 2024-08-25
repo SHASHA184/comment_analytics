@@ -11,7 +11,7 @@ from utils.async_client import (
 )
 from loguru import logger
 
-router = APIRouter(dependencies=[Depends(check_user)])
+router = APIRouter(dependencies=[Depends(check_user)], tags=["post"], prefix="/posts")
 
 
 @router.post("/", response_model=PostResponse)
