@@ -59,9 +59,7 @@ class DbApiAsyncClient:
                 json=payload,
             ) as response:
                 if response.status != 200:
-                    logger.error(f"Error {response.status} with {response.text}")
                     return response
-                logger.info(f"Response {response.status} with {response.text}")
 
                 if return_json:
                     return await response.json()
@@ -145,7 +143,7 @@ class PostGetRequest:
 
     @classmethod
     async def run(cls, post_id):
-        response = await DbApiAsyncClient.run_async(cls, params={"post_id": post_id})
+        response = await DbApiAsyncClient.run_async(cls, path_extra=post_id)
         return response
 
 
@@ -165,5 +163,5 @@ class PostDeleteRequest:
 
     @classmethod
     async def run(cls, post_id):
-        response = await DbApiAsyncClient.run_async(cls, params={"post_id": post_id})
+        response = await DbApiAsyncClient.run_async(cls, path_extra=post_id)
         return response

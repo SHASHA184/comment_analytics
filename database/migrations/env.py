@@ -9,7 +9,7 @@ from config import DATABASE_URL
 from sqlalchemy.ext.asyncio import create_async_engine
 import asyncio
 
-from models import User
+from models import User, Post
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
