@@ -22,14 +22,12 @@ async def create_post(post: PostCreate):
 
 @router.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: int):
-    logger.info(f"Getting post with id: {post_id}")
     db_response = await PostGetRequest.run(post_id)
     return db_response
 
 
 @router.get("/", response_model=List[PostResponse])
 async def get_posts():
-    logger.info("Getting all posts")
     db_response = await PostListRequest.run()
     return db_response
 
