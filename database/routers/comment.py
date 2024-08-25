@@ -4,6 +4,8 @@ from db_utils.conn import get_db
 from schemas.comment import CommentCreate, CommentResponse
 from models import Comment
 from loguru import logger
+from typing import List
+from datetime import date
 
 router = APIRouter(tags=["comment"], prefix="/comments")
 
@@ -12,9 +14,14 @@ async def create_comment(comment: CommentCreate, db: AsyncSession = Depends(get_
     new_comment = await Comment.create_comment(db, comment)
     return new_comment
 
-@router.get("/", response_model=list[CommentResponse])
+@router.get("/", response_model=List[CommentResponse])
 async def get_comments(db: AsyncSession = Depends(get_db)):
     comments = await Comment.get_comments(db)
+    return comments
+
+@router.get("/comments-daily-breakdown/", response_model=List[CommentResponse])
+async def get_comments_daily_breakdown(date_from: str, date_to: str, db: AsyncSession = Depends(get_db)):
+    comments = await Comment.get_comments_daily_breakdown(db, date_from, date_to)
     return comments
 
 @router.get("/{comment_id}", response_model=CommentResponse)

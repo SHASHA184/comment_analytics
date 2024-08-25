@@ -8,8 +8,10 @@ from utils.async_client import (
     CommentGetRequest,
     CommentListRequest,
     CommentDeleteRequest,
+    CommentListRangeRequest
 )
 from loguru import logger
+from datetime import date
 
 router = APIRouter(
     dependencies=[Depends(check_user)], tags=["comment"], prefix="/comments"
@@ -37,4 +39,12 @@ async def get_comments():
 @router.delete("/{comment_id}", response_model=CommentResponse)
 async def delete_comment(comment_id: int):
     db_response = await CommentDeleteRequest.run(comment_id)
+    return db_response
+
+
+@router.get("/comments-daily-breakdown/", response_model=List[CommentResponse])
+async def get_comments_daily_breakdown(date_from: date, date_to: date):
+    date_from_str = date_from.strftime('%Y-%m-%d')
+    date_to_str = date_to.strftime('%Y-%m-%d')
+    db_response = await CommentListRangeRequest.run(date_from_str, date_to_str)
     return db_response

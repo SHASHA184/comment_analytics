@@ -195,6 +195,18 @@ class CommentListRequest:
     async def run(cls):
         response = await DbApiAsyncClient.run_async(cls)
         return response
+    
+
+class CommentListRangeRequest:
+    method = Methods.GET
+    path = "comments/comments-daily-breakdown/"
+
+    @classmethod
+    async def run(cls, date_from, date_to):
+        response = await DbApiAsyncClient.run_async(
+            cls, params={"date_from": date_from, "date_to": date_to}
+        )
+        return response
 
 
 class CommentDeleteRequest:
