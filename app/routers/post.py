@@ -9,6 +9,7 @@ from utils.async_client import (
     PostListRequest,
     PostDeleteRequest,
 )
+from utils.moderate_text import moderate_text
 from loguru import logger
 
 router = APIRouter(dependencies=[Depends(check_user)], tags=["post"], prefix="/posts")
@@ -35,4 +36,14 @@ async def get_posts():
 @router.delete("/{post_id}", response_model=PostResponse)
 async def delete_post(post_id: int):
     db_response = await PostDeleteRequest.run(post_id)
+    return db_response
+
+@router.get("/moderate/{post_id}", response_model=PostResponse)
+async def moderate_post(post_id: int):
+    moderation_response = await moderate_text("I hate you!")
+    db_response = await PostGetRequest.run(post_id)
+    post = PostResponse(**db_response)
+    logger.info(post)
+    moderation_response = await moderate_text(post.content)
+    logger.info(moderation_response)
     return db_response
